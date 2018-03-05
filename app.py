@@ -40,7 +40,7 @@ def after_request(response):
 
 @app.route('/register', methods=('GET', 'POST'))
 def register():
-    form = form.RegisterForm()
+    form = forms.RegisterForm()
     if form.validate_on_submit():
         flash("Registration Successful", "success")
         models.User.create_user(username=form.username.data, email=form.email.data, password=form.password.data
@@ -51,7 +51,7 @@ def register():
 
 @app.route('/login', methods=('GET', 'POST'))
 def login():
-    form = form.LoginForm()
+    form = forms.LoginForm()
     if form.validate_on_submit():
         try:
             user = models.User.get(models.User.email == form.email.data)

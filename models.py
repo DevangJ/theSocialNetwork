@@ -81,5 +81,5 @@ class Relationship(Model):
 
 def initialize():
     DATABASE.connect()
-    DATABASE.create_tables([User, Post, Relationship], safe=True)
+    DATABASE.create_tables([User, Post], safe=True)
     DATABASE.close()
