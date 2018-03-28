@@ -133,6 +133,28 @@ def follow(username):
     return redirect(url_for('stream', username = to_user.username))
 
 
+'''
+@app.route('/like/<username>')
+@login_required
+def like(username):
+    try:
+        to_post = models.Post.get(models.Post.post_id**post_id)
+    except models.DoesNotExist:
+        abort(404)
+    else:
+        try:
+            models.Like.create(
+                from_user = g.user._get_current_object(),
+                to_post = to_post
+            )
+        except models.IntegrityError:
+            pass
+        else:
+            flash("You Liked {}'s post!'!".format(to_post.user), 'success')
+    return redirect(url_for('stream', username = to_post.user))
+'''
+
+
 @app.route('/post/<int:post_id>')
 def view_post(post_id):
     posts = models.Post.select().where(models.Post.id == post_id)

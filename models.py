@@ -62,6 +62,7 @@ class User(UserMixin, Model):
 
 class Post(Model):
     timestamp = DateTimeField(default=datetime.datetime.now)
+    #post_id = AutoField()
     user = ForeignKeyField(User, related_name='posts')
     content = TextField()
 
@@ -77,6 +78,17 @@ class Relationship(Model):
     class Meta:
         database = DATABASE
         indexes = ((('from_user', 'to_user'), True),)
+
+
+'''
+class Like(Model):
+    from_user = ForeignKeyField(User, related_name = 'relationships')
+    to_post = ForeignKeyField(Post, related_name = 'liked')
+
+    class Meta:
+        database = DATABASE
+        indexes = ((('from_user', 'to_post'), True),)
+'''
 
 
 def initialize():
