@@ -1,10 +1,13 @@
 {% extends 'stream.html' %}
 
 {% block content %}
+<article style="padding: 0%">
 <div class="row">
-    <div class="grid-25">
-        <h!>{{ user.username }}</h!>
+    <div class="grid-100">
+        <h1 style="text-align: left"><strong>@{{ user.username }}</strong></h1>
     </div>
+</div>
+<div class="row">
     <div class="grid-50">
         <div class="grid-33">
             <h5>Posts</h5>
@@ -19,18 +22,19 @@
             <p>{{ user.following().count() }}</p>
         </div>
     </div>
-    <div class="grid-25">
+    <div class="grid-50">
         <!-- Follow/Unfollow button -->
         {% if current_user.is_authenticated %}
             {% if user != current_user %}
                 {% if not user in current_user.following() %}
-                    <a href="{{ url_for('follow', username = user.username) }}" class="small">Follow</a>
+                    <a href="{{ url_for('follow', username = user.username) }}" class="small" style="text-align: right; color: green">Follow</a>
                 {% else %}
-                     <a href="{{ url_for('unfollow', username = user.username) }}" class="small">Un-Follow</a>
+                     <a href="{{ url_for('unfollow', username = user.username) }}" class="small" style="text-align: right; color: red">Un-Follow</a>
                 {% endif %}
             {% endif %}
         {% endif %}
     </div>
-    
+</div>
+</article>
 {{ super() }}
 {% endblock %}

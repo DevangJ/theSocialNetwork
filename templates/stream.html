@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-{% for post in stream %}
+{% for post in stream|reverse %}
     <article>
         <h2>
             <a href="{{ url_for('stream', username = post.user.username) }}">{{ post.user.username }}</a>
@@ -12,15 +12,15 @@
             {% else %}
               {% if post.content|length > 100 %}
                 {{ post.content[:100] }}...
+                <a class="view" href="{{ url_for('view_post', post_id = post.id) }}">View More</a>
               {% else %}
                 {{ post.content }}
               {% endif %}
             {% endif %}
         </div>
         <p>
-          {{ post.timestamp.strftime('%d-%m-%y') }}
+          Posted on {{ post.timestamp.strftime('%d-%m-%y') }}
         </p>
-        <a class="view" href="{{ url_for('view_post', post_id = post.id) }}">View More</a>
      </article>
 {% endfor %}
 {% endblock %}
