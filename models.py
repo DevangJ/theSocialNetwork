@@ -1,10 +1,16 @@
 import datetime
 
 from flask_bcrypt import generate_password_hash
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 from peewee import *
 
 DATABASE = SqliteDatabase('social.db')
+
+
+class Anonymous(AnonymousUserMixin):
+  def __init__(self):
+    self.username = 'Guest'
+
 
 class User(UserMixin, Model):
     username = CharField(unique=True)
