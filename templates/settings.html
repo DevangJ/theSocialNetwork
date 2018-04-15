@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h1 class="grid-100">
+    Settings
+  </h1>
+  <article class="">
+    <div class="post">
+      <p><a href="{{ url_for('settings_profile_edit') }}">Change Profile Info</a><br></p>
+    </div>
+    <div class="post">
+      <p><a href="{{ url_for('settings_new_password') }}">Change Password</a><br></p>
+    </div>
+  </article>
+{% endblock %}

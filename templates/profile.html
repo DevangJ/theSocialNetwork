@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <article>
+    <h1 style="text-align: center; font-size: 16pt;"><strong>Profile</strong></h1>
+    <div class="post">
+      <h2><strong>username</strong></h2>
+      <p>{{ user[0][1] }}</p>
+      <br>&nbsp
+    </div>
+    <div class="post">
+      <h2><strong>email</strong></h2>
+      <p>{{ user[0][3] }}</p>
+      <br>&nbsp
+    </div>
+    <div class="post">
+      <h2><strong>date of birth</strong></h2>
+      <p>{{ user[0][4] }}</p>
+      <br>&nbsp
+    </div>
+    <div class="post">
+      <h2><strong>bio</strong></h2>
+      <p>{{ user[0][5] }}</p>
+      <br>&nbsp
+    </div>
+    {% if user[0][0] == session['user_id'] %}
+      <div class="justify-content-md-center">
+        <a href="{{ url_for('settings') }}">Settings</a>
+      </div>
+    {% endif %}
+  </article>
+{% endblock %}

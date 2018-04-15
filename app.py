@@ -1,8 +1,9 @@
-from flask import Flask, g, render_template, flash, redirect, url_for, abort
+from flask import Flask, render_template, flash, redirect, url_for, abort, session, request
 from flask_bcrypt import check_password_hash
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from datetime import datetime
 import forms
-import models
+from db import *
+from flask_wtf.csrf import CSRFProtect
 
 DEBUG = True
 PORT = 8000
@@ -11,204 +12,216 @@ THREADED = True
 
 app = Flask(__name__)
 app.secret_key = 'thisisareallylongkeythatnooneknows'
+csrf = CSRFProtect(app)
 
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-login_manager.anonymous_user = models.Anonymous
-
-
-#Fetch User
-@login_manager.user_loader
-def load_user(userid):
-    try:
-        return models.User.get(models.User.id == userid)
-    except models.DoesNotExist:
-        return None
-
-
-#Save Current User
-@app.before_request
-def before_request():
-    g.db = models.DATABASE
-    g.db.connect()
-    g.user = current_user
-
-
-@app.after_request
-def after_request(response):
-    g.db.close()
-    return response
+#Home Page
+@app.route('/')
+def index():
+    if session.get('login'):
+        user = members_list()
+        stream = post_list()[:100]
+        return render_template('stream.html', stream = stream, user=user)
+    else:
+        return redirect(url_for('login'))
 
 # Register User
 @app.route('/register', methods=('GET', 'POST'))
 def register():
     form = forms.RegisterForm()
     if form.validate_on_submit():
+        register_user(form.username.data, form.password.data, form.email.data, form.dob.data, 'Tell us a bit about yourself')
         flash("Registration Successful", "success")
-        models.User.create_user(username=form.username.data, email=form.email.data, password=form.password.data)
         return redirect(url_for('index'))
     return render_template('register.html', form=form)
-
 
 #Login User
 @app.route('/login', methods=('GET', 'POST'))
 def login():
-    form = forms.LoginForm()
+    form= forms.LoginForm()
     if form.validate_on_submit():
-        try:
-            user = models.User.get(models.User.email == form.email.data)
-        except models.DoesNotExist:
-            flash("Your email or password doesn't match!", "error")
+        result = login_user(form.email.data, form.password.data)
+        if result:
+            session['login'] = True
+            session['user_id'] = result[0]
+            session['username'] = result[1]
+            session['email'] = result[3]
+            session['dob'] = result[4].strftime('%d-%m-%y')
+            flash('Logged in', 'success')
+            return redirect(url_for('index'))
         else:
-            if check_password_hash(user.password, form.password.data):
-                login_user(user)
-                flash("Logged in", "success")
-                return redirect(url_for('index'))
-            else:
-                flash("Your email or password doesn't match!", "error")
+            flash("Your email or password doesn't match!", "error")
     return render_template('login.html', form=form)
-
 
 #Logout User
 @app.route('/logout')
-@login_required
 def logout():
-    logout_user()
-    flash("You've been logged out! Come back soon!", "success")
-    return redirect(url_for('index'))
-
+    if session['login']:
+        session['login'] = False
+        session['user_id'] = 0
+        session['username'] = ''
+        session['email'] = ''
+        session['dob'] = ''
+        flash("You've been logged out! Come back soon!", "success")
+        return redirect(url_for('index'))
 
 #Make New Post
 @app.route('/new_post', methods = ('GET', 'POST'))
-@login_required
 def post():
-    form = forms.PostForm()
-    if form.validate_on_submit():
-        models.Post.create(user = g.user._get_current_object(),
-                          content = form.content.data.strip())
-        flash('Your Message has been posted!', 'Success')
-        return redirect(url_for('index'))
-    return render_template('post.html', form = form)
-
-
-#Home Page
-@app.route('/')
-def index():
-    stream = models.Post.select().limit(100)
-    return render_template('stream.html', stream = stream)
-
+    if session['login']:
+        form = forms.PostForm()
+        if form.validate_on_submit():
+            add_post(user_id = str(session['user_id']), article = form.content.data.strip())
+            flash('Your Message has been posted!', 'success')
+            return redirect(url_for('index'))
+        return render_template('post.html', form = form)
 
 #Displays Posts
 @app.route('/stream')
-@app.route('/stream/<username>')
-def stream(username = None):
+@app.route('/stream/<int:user_id>')
+def stream(user_id = None):
     template = 'stream.html'
-    if username and username != current_user.username:
-        try:
-            user = models.User.select().where(models.User.username**username).get()
-            stream = user.posts.limit(100)
-        except models.DoesNotExist:
-            abort(404)
-        else:
-            stream = user.posts.limit(100)
+    if user_id and user_id != session['user_id']:
+        user = member_info(str(user_id))
+        stream = post_list_by_my_id(user_id)[:100]
     else:
-        stream = current_user.get_stream().limit(100)
-        user = current_user
-    if username:
+        user = member_info(str(session['user_id']))
+        stream = post_list_by_id(str(session['user_id']))[:100]
+    if user_id:
         template = 'user_stream.html'
     return render_template(template, stream = stream, user = user)
 
-
 #Follow A User
-@app.route('/follow/<username>')
-@login_required
-def follow(username):
-    try:
-        to_user = models.User.get(models.User.username**username)
-    except models.DoesNotExist:
-        abort(404)
-    else:
+@app.route('/follow/<user_id>')
+def follow(user_id):
+    if session['login']:
         try:
-            models.Relationship.create(
-                from_user = g.user._get_current_object(),
-                to_user = to_user
-            )
-        except models.IntegrityError:
-            pass
+            to_user = member_info(user_id)
+        except to_user is False:
+            abort(404)
         else:
-            flash("You are now following {}!".format(to_user.username), 'success')
-    return redirect(url_for('stream', username = to_user.username))
-
+            result = follow_user(session['user_id'], to_user[0][0])
+            flash("You are now following {}!".format(to_user[0][1]), 'success')
+        return redirect(request.referrer)
 
 #Unfollow A User
-@app.route('/unfollow/<username>')
-@login_required
-def unfollow(username):
-    try:
-        to_user = models.User.get(models.User.username**username)
-    except models.DoesNotExist:
-        abort(404)
-    else:
+@app.route('/unfollow/<user_id>')
+def unfollow(user_id):
+    if session['login']:
         try:
-            models.Relationship.get(
-                from_user = g.user._get_current_object(),
-                to_user = to_user
-            ).delete_instance()
-        except models.IntegrityError:
-            pass
+            to_user = member_info(user_id)
+        except to_user is False:
+            abort(404)
         else:
-            flash("You unfollowed {}!".format(to_user.username), 'success')
-    return redirect(url_for('stream', username = to_user.username))
+            result = unfollow_user(session['user_id'], to_user[0][0])
+            flash("You unfollowed {}!".format(to_user[0][1]), 'success')
+        return redirect(request.referrer)
 
-
-'''
-@app.route('/like/<username>')
-@login_required
-def like(username):
-    try:
-        to_post = models.Post.get(models.Post.post_id**post_id)
-    except models.DoesNotExist:
-        abort(404)
-    else:
+#Like Post
+@app.route('/like/<post_id>')
+def like(post_id):
+    if session['login']:
         try:
-            models.Like.create(
-                from_user = g.user._get_current_object(),
-                to_post = to_post
-            )
-        except models.IntegrityError:
-            pass
+            to_post = post_list_by_post_id(post_id)
+        except to_post is False:
+            abort(404)
         else:
-            flash("You Liked {}'s post!'!".format(to_post.user), 'success')
-    return redirect(url_for('stream', username = to_post.user))
-'''
+            result = like_post(session['user_id'], to_post[0][0])
+        return redirect(request.referrer)
 
+#Unlike Post
+@app.route('/unlike/<post_id>')
+def unlike(post_id):
+    if session['login']:
+        if session['login']:
+            try:
+                to_post = post_list_by_post_id(post_id)
+            except to_post is False:
+                abort(404)
+            else:
+                result = unlike_post(session['user_id'], to_post[0][0])
+            return redirect(request.referrer)
+
+#Delete Post
+@app.route('/delete/<post_id>')
+def delete_clicked_post(post_id):
+    if session['login']:
+        result = delete_post(post_id)
+        return redirect(request.referrer)
+
+#Edit Post
+@app.route('/edit/<int:post_id>', methods = ('GET', 'POST'))
+def edit_clicked_post(post_id):
+    if session['login']:
+        form = forms.PostForm(content = post_list_by_post_id(post_id)[0][2])
+        if form.validate_on_submit():
+            edit_post(post_id = post_id, article = form.content.data.strip())
+            flash('Your Post has been edited!', 'success')
+            return redirect(url_for('index'))
+        return render_template('post.html', form = form)
 
 #Display Single Post
 @app.route('/post/<int:post_id>')
 def view_post(post_id):
-    posts = models.Post.select().where(models.Post.id == post_id)
-    if posts.count() == 100:
+    posts = post_list_by_post_id(post_id)
+    if len(posts) == 100:
         abort(404)
     return render_template('stream.html', stream = posts, use = 1)
 
+@app.route('/profile/<user_id>')
+def profile(user_id):
+    user = member_info(user_id)
+    return render_template('profile.html', user = user)
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
+
+@app.route('/settings/profile_edit', methods=('GET', 'POST'))
+def settings_profile_edit():
+    if session['login']:
+        user = member_info(session['user_id'])
+        form = forms.ProfileForm(x = user[0][0], username = user[0][1], email = user[0][3], dob = user[0][4], bio = user[0][5])
+        if form.validate_on_submit():
+            if (form.username.data in username_not_mine_fetch(session['username'])):
+                flash("Username is already in use!", "error")
+            elif (form.email.data in email_not_mine_fetch(session['email'])):
+                flash("Email is already in use!", "error")
+            else:
+                result = update_member(session['user_id'], form.username.data, form.email.data, form.dob.data, form.bio.data)
+                if result:
+                    session['username'] = form.username.data
+                    session['email'] = form.email.data
+                    session['dob'] = form.dob.data
+                    flash('Edited', 'success')
+                    return redirect(url_for('settings'))
+        return render_template('profile_edit.html', form = form)
+
+@app.route('/settings/new_password', methods=('GET', 'POST'))
+def settings_new_password():
+    if session['login']:
+        form = forms.PasswordForm()
+        user = member_info(session['user_id'])
+        if form.validate_on_submit():
+            if check_password_hash(user[0][2], form.currentpassword.data):
+                update_password(user[0][0], form.newpassword.data)
+                flash('New password set', 'success')
+                return redirect(url_for('settings'))
+            else:
+                flash("Incorrect Password!", "error")
+        return render_template('password_edit.html', form = form)
 
 #Handle 404 Errors
 @app.errorhandler(404)
 def not_found(error):
     return render_template('404.html'), 404
 
-
-#Main Function
+#Main Function Ported
 if __name__ == '__main__':
-    models.initialize()
-    try:
-        models.User.create_user(
-            username='Devang J',
-            email='devang.j1998@gmail.com',
-            password='admin123',
-            admin=True
-        )
-    except ValueError:
-        pass
+    app.jinja_env.globals.update(username_fetch_by_id=username_fetch_by_id)
+    app.jinja_env.globals.update(following_list=following_list)
+    app.jinja_env.globals.update(follower_list=follower_list)
+    app.jinja_env.globals.update(post_list_by_id=post_list_by_id)
+    app.jinja_env.globals.update(like_list_by_post_id=like_list_by_post_id)
+    app.jinja_env.globals.update(post_list_by_my_id=post_list_by_my_id)
     app.run(debug=DEBUG, host=HOST, port=PORT, threaded=THREADED)

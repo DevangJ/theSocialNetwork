@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="main">
+  <nav>
+    {% if session['login'] %}
+      <a href="{{ url_for('members') }}">All</a>
+      <a href="{{ url_for('members', following = 1) }}">Following</a>
+      <a href="{{ url_for('members', following = 0) }}" class="new">Followers</a>
+    {% endif %}
+  </nav>
+</div>
+{% for user in stream|reverse %}
+  <article>
+    <h2>
+      <a href="{{ url_for('stream', user_id = post[1]) }}">@{{ username_fetch_by_id(user[1]) }}</a>
+    </h2>
+  </article>
+{% endfor %}
+{% endblock %}

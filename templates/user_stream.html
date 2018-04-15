@@ -4,32 +4,32 @@
 <article style="padding: 0%">
 <div class="row">
     <div class="grid-100">
-        <h1 style="text-align: left"><strong>@{{ user.username }}</strong></h1>
+        <h1 style="text-align: left; font-size: 16pt;"><strong><a href="{{ url_for('profile', user_id = user[0][0])}}">@{{ user[0][1] }}</a></strong></h1><br>
     </div>
 </div>
 <div class="row">
     <div class="grid-50">
         <div class="grid-33">
             <h5>Posts</h5>
-            <p>{{ user.posts.count() }}</p>
+            <p>{{ post_list_by_my_id(user[0][0])|length }}</p>
         </div>
         <div class="grid-33">
             <h5>Followers</h5>
-            <p>{{ user.followers().count() }}</p>
+            <p>{{ follower_list(user[0][0])|length }}</p>
         </div>
         <div class="grid-33">
             <h5>Following</h5>
-            <p>{{ user.following().count() }}</p>
+            <p>{{ following_list(user[0][0])|length }}</p>
         </div>
     </div>
     <div class="grid-50">
         <!-- Follow/Unfollow button -->
-        {% if current_user.is_authenticated %}
-            {% if user != current_user %}
-                {% if not user in current_user.following() %}
-                    <a href="{{ url_for('follow', username = user.username) }}" class="small" style="text-align: right; color: green">Follow</a>
-                {% else %}
-                     <a href="{{ url_for('unfollow', username = user.username) }}" class="small" style="text-align: right; color: red">Un-Follow</a>
+        {% if session['login'] %}
+            {% if user[0][0] != session['user_id'] %}
+              {% if user[0][1] in following_list(session['user_id']) %}
+                <a href="{{ url_for('unfollow', user_id = user[0][0]) }}" class="small" style="text-align: right; color: red">Un-Follow</a>
+              {% else %}
+                <a href="{{ url_for('follow', user_id = user[0][0]) }}" class="small" style="text-align: right; color: green">Follow</a>
                 {% endif %}
             {% endif %}
         {% endif %}
