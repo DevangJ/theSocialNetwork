@@ -114,3 +114,6 @@ class PasswordForm(FlaskForm):
         'Confirm Password',
         validators=[DataRequired()]
     )
+
+class DeleteForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])

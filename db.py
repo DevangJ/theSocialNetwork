@@ -1,9 +1,13 @@
 import mysql.connector
+# import psycopg2
 from flask_bcrypt import generate_password_hash, check_password_hash
 
 #DB connections and calls
 def connectDB(host='localhost', database='thesocialnetwork', user='root', password='1234'):
     return mysql.connector.connect(host=host, database=database, user=user, password=password)
+
+# def connectDB(host='localhost', database='thesocialnetwork', user='root', password='1234'):
+#     return psycopg2.connect("host=%s, dbname=%s, user=%s, password=%s", (host, database, user, password))
 
 def disconnectDB(conn):
     conn.close()
@@ -53,6 +57,15 @@ def update_password(user_id, password):
     user_id = str(user_id)
     password = generate_password_hash(password)
     executeDB(c,"update members set password=%s where user_id=%s",(password, user_id))
+    disconnectDB(c)
+    return True
+
+def delete_member(user_id):
+    c = connectDB()
+    user_id = str(user_id)
+    executeDB(c,"delete from members where user_id="+user_id,())
+    flush_follow(user_id)
+    flush_posts(user_id)
     disconnectDB(c)
     return True
 
@@ -175,8 +188,9 @@ def member_info(user_id):
 def username_fetch():
     c = connectDB()
     result = queryDB(c,"select username from members")
+    result1 = [x[0] for x in result]
     disconnectDB(c)
-    return result
+    return result1
 
 def username_not_mine_fetch(username):
     c = connectDB()
@@ -189,6 +203,14 @@ def username_fetch_by_id(user_id):
     c = connectDB()
     user_id = str(user_id)
     result = queryDB(c,"select username from members where user_id = "+user_id)
+    result = result[0][0]
+    disconnectDB(c)
+    return result
+
+def user_id_fetch_by_name(username):
+    c = connectDB()
+    username = str(username)
+    result = queryDB(c,"select user_id from members where username = '"+username+"'")
     result = result[0][0]
     disconnectDB(c)
     return result
@@ -216,6 +238,10 @@ def members_list():
 def flush_posts(user_id):
     c = connectDB()
     user_id = str(user_id)
+    result = post_list_by_my_id(user_id)
+    post_list = [x[0] for x in result]
+    for post in post_list:
+        flush_likes(post)
     executeDB(c,"delete from posts where user_id="+user_id,())
     disconnectDB(c)
     return True

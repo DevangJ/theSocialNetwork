@@ -3,18 +3,25 @@
 {% block content %}
 <div class="main">
   <nav>
+    <a href="{{ url_for('stream_member') }}">All members</a>
     {% if session['login'] %}
-      <a href="{{ url_for('members') }}">All</a>
-      <a href="{{ url_for('members', following = 1) }}">Following</a>
-      <a href="{{ url_for('members', following = 0) }}" class="new">Followers</a>
+      <a href="{{ url_for('stream_member_following') }}">Following</a>
+      <a href="{{ url_for('stream_member_follower') }}">Followers</a>
     {% endif %}
   </nav>
 </div>
 {% for user in stream|reverse %}
   <article>
-    <h2>
-      <a href="{{ url_for('stream', user_id = post[1]) }}">@{{ username_fetch_by_id(user[1]) }}</a>
-    </h2>
+    <a href="{{ url_for('stream', user_id = user_id_fetch_by_name(user)) }}">@{{ user }}</a>
+    {% if session['login'] %}
+        {% if user != session['username'] %}
+          {% if user in following_list(session['user_id']) %}
+            <a href="{{ url_for('unfollow', user_id = user_id_fetch_by_name(user)) }}" class="small" style="float: right; color: red">Un-Follow</a>
+          {% else %}
+            <a href="{{ url_for('follow', user_id = user_id_fetch_by_name(user)) }}" class="small" style="float: right; color: green">Follow</a>
+            {% endif %}
+        {% endif %}
+    {% endif %}
   </article>
 {% endfor %}
 {% endblock %}

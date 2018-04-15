@@ -80,7 +80,8 @@
             <!-- <a href="">Most Liked</a> -->
             {% if session['login'] %}
               <a href="{{ url_for('index') }}">All</a>
-              <a href="{{ url_for('stream', user_id = session['user_id']) }}">Following</a>
+              <a href="{{ url_for('stream', user_id = session['user_id']) }}">Posts by people you follow</a>
+              <a href="{{ url_for('stream_member') }}">Members</a>
               <a href="{{ url_for('post') }}" class="new">Create a New Post</a>
             {% endif %}
 

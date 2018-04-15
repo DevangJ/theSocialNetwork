@@ -211,6 +211,36 @@ def settings_new_password():
                 flash("Incorrect Password!", "error")
         return render_template('password_edit.html', form = form)
 
+@app.route('/settings/delete_account', methods=('GET', 'POST'))
+def settings_delete_account():
+    if session['login']:
+        form = forms.DeleteForm()
+        user = member_info(session['user_id'])
+        if form.validate_on_submit():
+            if check_password_hash(user[0][2], form.password.data):
+                delete_member(user[0][0])
+                flash('Account Deleted', 'success')
+                logout()
+                return redirect(url_for('index'))
+            else:
+                flash("Incorrect Password!", "error")
+        return render_template('delete_account.html', form = form)
+
+@app.route('/stream_member')
+def stream_member():
+    stream = username_fetch()
+    return render_template('stream_members.html', stream = stream)
+
+@app.route('/stream_member/following')
+def stream_member_following():
+    stream = following_list(session['user_id'])
+    return render_template('stream_members.html', stream = stream)
+
+@app.route('/stream_member/follower')
+def stream_member_follower():
+    stream = follower_list(session['user_id'])
+    return render_template('stream_members.html', stream = stream)
+
 #Handle 404 Errors
 @app.errorhandler(404)
 def not_found(error):
@@ -224,4 +254,5 @@ if __name__ == '__main__':
     app.jinja_env.globals.update(post_list_by_id=post_list_by_id)
     app.jinja_env.globals.update(like_list_by_post_id=like_list_by_post_id)
     app.jinja_env.globals.update(post_list_by_my_id=post_list_by_my_id)
+    app.jinja_env.globals.update(user_id_fetch_by_name=user_id_fetch_by_name)
     app.run(debug=DEBUG, host=HOST, port=PORT, threaded=THREADED)
