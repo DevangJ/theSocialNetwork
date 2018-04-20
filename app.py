@@ -75,6 +75,32 @@ def post():
             return redirect(url_for('index'))
         return render_template('post.html', form = form)
 
+#Delete Post
+@app.route('/delete/<post_id>')
+def delete_clicked_post(post_id):
+    if session['login']:
+        result = delete_post(post_id)
+        return redirect(request.referrer)
+
+#Edit Post
+@app.route('/edit/<int:post_id>', methods = ('GET', 'POST'))
+def edit_clicked_post(post_id):
+    if session['login']:
+        form = forms.PostForm(content = post_list_by_post_id(post_id)[0][2])
+        if form.validate_on_submit():
+            edit_post(post_id = post_id, article = form.content.data.strip())
+            flash('Your Post has been edited!', 'success')
+            return redirect(url_for('index'))
+        return render_template('post.html', form = form)
+
+#Display Single Post
+@app.route('/post/<int:post_id>')
+def view_post(post_id):
+    posts = post_list_by_post_id(post_id)
+    if len(posts) == 100:
+        abort(404)
+    return render_template('stream.html', stream = posts, use = 1)
+
 #Displays Posts
 @app.route('/stream')
 @app.route('/stream/<int:user_id>')
@@ -141,41 +167,16 @@ def unlike(post_id):
                 result = unlike_post(session['user_id'], to_post[0][0])
             return redirect(request.referrer)
 
-#Delete Post
-@app.route('/delete/<post_id>')
-def delete_clicked_post(post_id):
-    if session['login']:
-        result = delete_post(post_id)
-        return redirect(request.referrer)
-
-#Edit Post
-@app.route('/edit/<int:post_id>', methods = ('GET', 'POST'))
-def edit_clicked_post(post_id):
-    if session['login']:
-        form = forms.PostForm(content = post_list_by_post_id(post_id)[0][2])
-        if form.validate_on_submit():
-            edit_post(post_id = post_id, article = form.content.data.strip())
-            flash('Your Post has been edited!', 'success')
-            return redirect(url_for('index'))
-        return render_template('post.html', form = form)
-
-#Display Single Post
-@app.route('/post/<int:post_id>')
-def view_post(post_id):
-    posts = post_list_by_post_id(post_id)
-    if len(posts) == 100:
-        abort(404)
-    return render_template('stream.html', stream = posts, use = 1)
-
+#Show Profile
 @app.route('/profile/<user_id>')
 def profile(user_id):
     user = member_info(user_id)
     return render_template('profile.html', user = user)
 
+#Settings
 @app.route('/settings')
 def settings():
     return render_template('settings.html')
-
 
 @app.route('/settings/profile_edit', methods=('GET', 'POST'))
 def settings_profile_edit():
@@ -226,6 +227,7 @@ def settings_delete_account():
                 flash("Incorrect Password!", "error")
         return render_template('delete_account.html', form = form)
 
+#Display Members
 @app.route('/stream_member')
 def stream_member():
     stream = username_fetch()
@@ -246,7 +248,7 @@ def stream_member_follower():
 def not_found(error):
     return render_template('404.html'), 404
 
-#Main Function Ported
+#Main Function
 if __name__ == '__main__':
     app.jinja_env.globals.update(username_fetch_by_id=username_fetch_by_id)
     app.jinja_env.globals.update(following_list=following_list)

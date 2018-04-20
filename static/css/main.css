@@ -52,7 +52,7 @@ p {
 /*Header*/
 header {
   width: 100%;
-  background: #fff;
+  background: #fff; /*#343a40*/
   padding: 10px 0;
 }
 .icon-logo {
@@ -363,3 +363,11 @@ footer p {
     white-space: pre-line;
     overflow-wrap: break-word;
 }
+
+/* .head {
+  text-decoration: none;
+  color: #ffffff;
+}
+.head:hover {
+  color: #ffb770;
+} */

@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, DateField
 from wtforms.validators import DataRequired, Regexp, ValidationError, Email, Length, EqualTo
-from flask_admin.form import widgets
 from wtforms.fields.html5 import DateField
 
 from db import *
@@ -56,9 +55,7 @@ class RegisterForm(FlaskForm):
     )
     dob  = DateField(
         'Your Birthday',
-        format='%d/%m/%y',
         validators=[DataRequired()],
-        widget=widgets.DatePickerWidget()
     )
 
 
@@ -90,9 +87,7 @@ class ProfileForm(FlaskForm):
         ])
     dob  = DateField(
         'Your Birthday',
-        format='%d/%m/%y',
         validators=[DataRequired()],
-        widget=widgets.DatePickerWidget()
     )
     bio = TextAreaField('Bio', validators=[DataRequired()])
 

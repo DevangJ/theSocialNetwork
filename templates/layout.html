@@ -16,18 +16,17 @@
     <![endif]-->
   </head>
   <body>
-
     <header>
       <div class="row">
         <div class="grid-50">
           <h1 style="text-align: left; font-size:30px">theSocialNetwork</h1>
         </div>
+	{% if session['login'] %}
         <div class="grid-50">
           <h1 style="text-align: right"><a href="{{ url_for('settings') }}"><img src="/static/img/settings-icon.png" style="width: 7%"></img></a></h1>
         </div>
-
+	{% endif %}
         </div>
-
         <div class="row">
           <div class="grid-33">
           {% if session['login'] %}
@@ -36,16 +35,11 @@
             <h3 style="text-align: left; padding-left: 0px"><a href="{{ url_for('index') }}">&nbsp&nbsp&nbsp&nbsp&nbsp</a></h3>
           {% endif %}
           </div>
-
           <div class="grid-33">
-
               <!-- Say Hi -->
             <h3>Hello{% if session['login'] %} <a href="{{ url_for('profile', user_id = session['user_id'])}}">{{ session['username'] }}</a>{% endif %}!</h3>
-
           </div>
-
           <div class="grid-33">
-
               <!-- Log in/Log out -->
             <h3 style="text-align: right">
               {% if session['login'] %}
@@ -57,9 +51,7 @@
               {% endif %}
             </h3>
           </div>
-
         </div>
-
       </header>
 
       <!-- Flash messages -->

@@ -88,7 +88,7 @@ def delete_post(post_id):
 def edit_post(article, post_id):
     c = connectDB()
     post_id = str(post_id)
-    executeDB(c,"update posts set article='"+article+"' where post_id="+post_id,())
+    executeDB(c,"update posts set article=%s where post_id="+post_id,(article,))
     disconnectDB(c)
     return True
 
@@ -166,8 +166,9 @@ def follower_list(user_id):
     c = connectDB()
     user_id = str(user_id)
     result = queryDB(c,"select username from members where user_id in (select from_id from follows where to_id="+user_id+")")
+    result1 = [x[0] for x in result]
     disconnectDB(c)
-    return result
+    return result1
 
 def following_list(user_id):
     c = connectDB()
