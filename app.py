@@ -274,13 +274,16 @@ def not_found(error):
     return render_template('404.html'), 404
 
 
+# Global function declarations
+app.jinja_env.globals.update(username_fetch_by_id=db.username_fetch_by_id)
+app.jinja_env.globals.update(following_list=db.following_list)
+app.jinja_env.globals.update(follower_list=db.follower_list)
+app.jinja_env.globals.update(post_list_by_id=db.post_list_by_id)
+app.jinja_env.globals.update(like_list_by_post_id=db.like_list_by_post_id)
+app.jinja_env.globals.update(post_list_by_my_id=db.post_list_by_my_id)
+app.jinja_env.globals.update(user_id_fetch_by_name=db.user_id_fetch_by_name)
+
+
 # Main Function
 if __name__ == '__main__':
-    app.jinja_env.globals.update(username_fetch_by_id=db.username_fetch_by_id)
-    app.jinja_env.globals.update(following_list=db.following_list)
-    app.jinja_env.globals.update(follower_list=db.follower_list)
-    app.jinja_env.globals.update(post_list_by_id=db.post_list_by_id)
-    app.jinja_env.globals.update(like_list_by_post_id=db.like_list_by_post_id)
-    app.jinja_env.globals.update(post_list_by_my_id=db.post_list_by_my_id)
-    app.jinja_env.globals.update(user_id_fetch_by_name=db.user_id_fetch_by_name)
     app.run(debug=DEBUG, host=HOST, port=PORT, threaded=THREADED)
