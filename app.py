@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from flask import Flask, render_template, flash, redirect, url_for, abort, session, request
 from flask_bcrypt import check_password_hash
 import forms
