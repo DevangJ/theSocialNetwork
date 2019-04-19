@@ -100,12 +100,27 @@ def edit_clicked_post(post_id):
 
 
 # Display Single Post
-@app.route('/post/<int:post_id>')
+@app.route('/post/<int:post_id>', methods=('GET', 'POST'))
 def view_post(post_id):
+    form=forms.Comment()
+    if form.validate_on_submit():
+        db.add_comment(post_id, session['user_id'],form.comment.data)
+        form=forms.Comment(comment='')
     posts = db.post_list_by_post_id(post_id)
-    if len(posts) == 100:
+    comments = db.comment_list_by_post_id(post_id)
+    if len(posts) == 0:
         abort(404)
-    return render_template('stream.html', stream=posts, use=1)
+    if len(comments) > 500:
+        abort(404)
+    return render_template('stream.html', stream=posts, use=1, form=form, comments=comments)
+
+
+# Delete Comment
+@app.route('/delete_comment/<comment_id>')
+def delete_comment(comment_id):
+    if session['login']:
+        db.delete_comment_by_comment_id(comment_id)
+        return redirect(request.referrer)
 
 
 # Displays Posts

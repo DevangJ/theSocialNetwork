@@ -81,7 +81,7 @@ header {
   float: right;
 }
 /*like button*/
-.btn-dark {
+/* .btn-dark {
   color: #fff;
   background-color: #343a40;
   border-color: #343a40;
@@ -102,12 +102,20 @@ header {
   line-height: 1.5;
   border-radius: 0.25rem;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
+} */
 .btn-sm, .btn-group-sm > .btn {
-  padding: 0.25rem 0.5rem;
+  /* padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
   line-height: 1.5;
-  border-radius: 0.2rem;
+  border-radius: 0.2rem; */
+  width: auto;
+  opacity: 1;
+  outline: none;
+  box-shadow: none;
+}
+.btn:focus {
+  outline: none;
+  box-shadow: none;
 }
 /* badges for likes*/
 .badge {
@@ -359,15 +367,10 @@ footer p {
   }
 }
 
-.post
-    white-space: pre-line;
-    overflow-wrap: break-word;
+.comment {
+    padding: 0;
 }
 
-/* .head {
-  text-decoration: none;
-  color: #ffffff;
+.comment-user {
+  white-space:nowrap;
 }
-.head:hover {
-  color: #ffb770;
-} */

@@ -11,4 +11,3 @@ for (var num in nav) {
         
     }
 }
-disTime(0);

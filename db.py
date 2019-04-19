@@ -6,18 +6,19 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 
 # DB connections and calls
 # Connect To Database
+
 # for mysql
 # def connectDB(host='localhost', database='thesocialnetwork', user='root', password='1234'):
 #     return mysql.connector.connect(host=host, database=database, user=user, password=password)
+
 # for postgresql local
-# def connectDB(host='localhost', database='thesocialnetwork', user='root', password='1234', port='5432'):
-#     return psycopg2.connect("host="+host+" dbname="+database+" user="+user+" password="+password+" port="+port)
+def connectDB(host='localhost', database='thesocialnetwork', user='root', password='1234', port='5432'):
+    return psycopg2.connect("host="+host+" dbname="+database+" user="+user+" password="+password+" port="+port)
+
 # for heroku postgresql
-DATABASE_URL = os.environ['DATABASE_URL']
-
-
-def connectDB():
-    return psycopg2.connect(DATABASE_URL, sslmode='require')
+# DATABASE_URL = os.environ['DATABASE_URL']
+# def connectDB():
+#     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
 # Disconnect From Database
@@ -97,6 +98,7 @@ def delete_member(user_id):
     executeDB(c, "delete from members where user_id="+user_id, ())
     flush_follow(user_id)
     flush_posts(user_id)
+    flush_comments_for_user(user_id)
     disconnectDB(c)
     return True
 
@@ -117,6 +119,7 @@ def delete_post(post_id):
     post_id = str(post_id)
     executeDB(c, "delete from posts where post_id="+post_id, ())
     flush_likes(post_id)
+    flush_comments(post_id)
     disconnectDB(c)
     return True
 
@@ -163,6 +166,35 @@ def post_list_by_post_id(post_id):
     result = queryDB(c, "select * from posts where post_id ="+post_id)
     disconnectDB(c)
     return result
+
+
+# Comments
+# Add Comment
+def add_comment(post_id, user_id, comment):
+    c = connectDB()
+    post_id = str(post_id)
+    user_id = str(user_id)
+    executeDB(c, "insert into comments values(default,"+post_id+","+user_id+",%s, now())", (comment,))
+    disconnectDB(c)
+    return True
+
+
+# Comment List By Post ID
+def comment_list_by_post_id(post_id):
+    c = connectDB()
+    post_id = str(post_id)
+    result = queryDB(c, "select * from comments where post_id ="+post_id)
+    disconnectDB(c)
+    return result
+
+
+# Delete comment
+def delete_comment_by_comment_id(comment_id):
+    c = connectDB()
+    comment_id = str(comment_id)
+    executeDB(c, "delete from comments where comment_id="+comment_id, ())
+    disconnectDB(c)
+    return True
 
 
 # Like, Unlike and Like List
@@ -306,6 +338,7 @@ def members_list():
 
 
 # Flush tables
+# Flush Posts
 def flush_posts(user_id):
     c = connectDB()
     user_id = str(user_id)
@@ -313,6 +346,7 @@ def flush_posts(user_id):
     post_list = [x[0] for x in result]
     for post in post_list:
         flush_likes(post)
+        flush_comments(post)
     executeDB(c, "delete from posts where user_id="+user_id, ())
     disconnectDB(c)
     return True
@@ -335,6 +369,24 @@ def flush_likes(post_id):
     disconnectDB(c)
     return True
 
+
+# Flush Comments
+def flush_comments(post_id):
+    c = connectDB()
+    post_id = str(post_id)
+    executeDB(c, "delete from comments where post_id="+post_id, ())
+    disconnectDB(c)
+    return True
+
+
+def flush_comments_for_user(user_id):
+    c = connectDB()
+    user_id = str(user_id)
+    executeDB(c, "delete from comments where user_id="+user_id, ())
+    disconnectDB(c)
+    return True
+
+
 # members
 #     user_id	int(11) Auto Increment
 #     username	text
@@ -351,5 +403,13 @@ def flush_likes(post_id):
     # user_id	int(11)
     # post_id	int(11) Auto Increment
     # article	mediumtext
-    # date_time	timestamp [CURRENT_TIMESTAMP]
+    # timestamp	timestamp [CURRENT_TIMESTAMP]
 # Follow
+    # from_id   int(11)
+    # to_id     int(11)
+# Comments
+    # comment_id    int(11) Auto Increment
+    # post_id       int(11)
+    # user_id       int(11)
+    # comment_text  mediumtext
+    # timestamp     timestamp [CURRENT_TIMESTAMP]

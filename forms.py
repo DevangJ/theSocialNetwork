@@ -65,7 +65,7 @@ class LoginForm(FlaskForm):
 
 
 class PostForm(FlaskForm):
-    content = TextAreaField("What's Up?", validators=[DataRequired()])
+    content = TextAreaField("What's Up? (Try an image link for it to show up)", render_kw={'class': 'form-control', 'rows': 11}, validators=[DataRequired()])
 
 
 class ProfileForm(FlaskForm):
@@ -112,3 +112,6 @@ class PasswordForm(FlaskForm):
 
 class DeleteForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
+
+class Comment(FlaskForm):
+    comment = TextAreaField("Comment . . .", render_kw={'class': 'form-control', 'rows': 1}, validators=[DataRequired()])

@@ -11,17 +11,20 @@
   </nav>
 </div>
 {% for user in stream|reverse %}
-  <article>
+  <article id="user-{{ user_id_fetch_by_name(user) }}">
     <a href="{{ url_for('stream', user_id = user_id_fetch_by_name(user)) }}">@{{ user }}</a>
     {% if session['login'] %}
         {% if user != session['username'] %}
           {% if user in following_list(session['user_id']) %}
-            <a href="{{ url_for('unfollow', user_id = user_id_fetch_by_name(user)) }}" class="small" style="float: right; color: red">Un-Follow</a>
+            <button type="button" style=" float: right;" class="btn btn-outline-danger btn-sm unfollow-btn" id="unfollow-btn-{{ user_id_fetch_by_name(user) }}">Unfollow</button>
           {% else %}
-            <a href="{{ url_for('follow', user_id = user_id_fetch_by_name(user)) }}" class="small" style="float: right; color: green">Follow</a>
+            <button type="button" style=" float: right;" class="btn btn-outline-success btn-sm follow-btn" id="follow-btn-{{ user_id_fetch_by_name(user) }}">Follow</button>
             {% endif %}
         {% endif %}
     {% endif %}
   </article>
 {% endfor %}
+{% endblock %}
+{% block script %}
+<script src="/static/js/stream_members.js"></script>
 {% endblock %}

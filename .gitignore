@@ -1,0 +1,9 @@
+venv/
+.vscode/
+__pycache__/db.cpython-37.pyc
+__pycache__/forms.cpython-37.pyc
+static/css/bootstrap-grid.css
+static/css/bootstrap-reboot.css
+static/css/bootstrap.css
+static/js/bootstrap.bundle.js
+static/js/bootstrap.js

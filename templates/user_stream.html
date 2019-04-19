@@ -14,12 +14,12 @@
             <p>{{ post_list_by_my_id(user[0][0])|length }}</p>
         </div>
         <div class="grid-33">
-            <h5>Followers</h5>
-            <p>{{ follower_list(user[0][0])|length }}</p>
-        </div>
+                <h5>Following</h5>
+                <p>{{ following_list(user[0][0])|length }}</p>
+            </div>
         <div class="grid-33">
-            <h5>Following</h5>
-            <p>{{ following_list(user[0][0])|length }}</p>
+            <h5>Followers</h5>
+            <p id="follower-count">{{ follower_list(user[0][0])|length }}</p>
         </div>
     </div>
     <div class="grid-50">
@@ -27,9 +27,9 @@
         {% if session['login'] %}
             {% if user[0][0] != session['user_id'] %}
               {% if user[0][1] in following_list(session['user_id']) %}
-                <a href="{{ url_for('unfollow', user_id = user[0][0]) }}" class="small" style="text-align: right; color: red">Un-Follow</a>
+                <button type="button" style=" float: right;" class="btn btn-outline-danger btn-sm unfollow-btn" id="unfollow-btn-{{ user[0][0] }}">Unfollow</button>
               {% else %}
-                <a href="{{ url_for('follow', user_id = user[0][0]) }}" class="small" style="text-align: right; color: green">Follow</a>
+                <button type="button" style=" float: right;" class="btn btn-outline-success btn-sm follow-btn" id="follow-btn-{{ user[0][0] }}">Follow</button>
                 {% endif %}
             {% endif %}
         {% endif %}
@@ -37,4 +37,8 @@
 </div>
 </article>
 {{ super() }}
+{% endblock %}
+{% block script %}
+{{ super() }}
+<script src="/static/js/stream_members.js"></script>
 {% endblock %}
