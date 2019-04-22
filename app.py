@@ -106,7 +106,8 @@ def view_post(post_id):
     form=forms.Comment()
     if form.validate_on_submit():
         db.add_comment(post_id, session['user_id'],form.comment.data)
-        form=forms.Comment(comment='')
+        return redirect(url_for('view_post', post_id=post_id))
+        # form=forms.Comment(comment='')
     posts = db.post_list_by_post_id(post_id)
     comments = db.comment_list_by_post_id(post_id)
     if len(posts) == 0:
