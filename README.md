@@ -26,7 +26,9 @@ The Social Network uses a number of Frameworks and Languages to work properly:
 
 ### Installation
 
-The Social Network requires [Python 3.7.2](https://www.python.org/downloads/) to run.
+Our website is live [here](https://the-social-network.herokuapp.com).
+
+The Social Network requires [Python 3.7.2](https://www.python.org/downloads/) to run locally.
 
 If you wish to run the app locally you can clone from the [repository](https://github.com/DevangJ/theSocialNetwork)
 ```sh
