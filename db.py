@@ -16,9 +16,9 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 #   return psycopg2.connect("host="+host+" dbname="+database+" user="+user+" password="+password+" port="+port)
 
 # for heroku postgresql
- DATABASE_URL = os.environ['DATABASE_URL']
- def connectDB():
-     return psycopg2.connect(DATABASE_URL, sslmode='require')
+DATABASE_URL = os.environ['DATABASE_URL']
+def connectDB():
+    return psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
 # Disconnect From Database
