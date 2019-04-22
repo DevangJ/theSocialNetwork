@@ -12,13 +12,13 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 #     return mysql.connector.connect(host=host, database=database, user=user, password=password)
 
 # for postgresql local
-def connectDB(host='localhost', database='thesocialnetwork', user='root', password='1234', port='5432'):
-    return psycopg2.connect("host="+host+" dbname="+database+" user="+user+" password="+password+" port="+port)
+# def connectDB(host='localhost', database='thesocialnetwork', user='root', password='1234', port='5432'):
+#   return psycopg2.connect("host="+host+" dbname="+database+" user="+user+" password="+password+" port="+port)
 
 # for heroku postgresql
-# DATABASE_URL = os.environ['DATABASE_URL']
-# def connectDB():
-#     return psycopg2.connect(DATABASE_URL, sslmode='require')
+ DATABASE_URL = os.environ['DATABASE_URL']
+ def connectDB():
+     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
 # Disconnect From Database
