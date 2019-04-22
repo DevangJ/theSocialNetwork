@@ -37,7 +37,7 @@ Create the postgreSQL database from the given dump
 
 ```sh
 $ cd theSocialNetwork
-$ psql thesocialnetwork < latestDump
+$ psql thesocialnetwork < new.dump
 ```
 
 Set up the virtual environment, install the dependencies and start the server.
